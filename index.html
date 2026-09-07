@@ -156,6 +156,7 @@ const TRADUCOES = {
     cad_doc: "CNPJ ou CPF", cad_telefone: "Telefone", cad_email: "E-mail de contato",
     cad_pix: "Chave PIX", cad_opcional: "(opcional)",
     cad_regime: "Regime fiscal", cad_selecione: "Selecione...",
+    cad_aliquota: "Alíquota de ISS (%)",
     cad_salvar: "Salvar e continuar", cad_salvar_alteracoes: "Salvar alterações",
     cad_logo_erro_tamanho: "A logo deve ter no máximo 2 MB.",
     cad_logo_erro_tipo: "Arquivo inválido. Envie um PNG, JPG ou WEBP de verdade.",
@@ -1073,6 +1074,7 @@ function CadastroEmpresaPage({ empresa, onSaved, setScreen, onVoltarLogin }) {
         pix_chave: pais === "BR" ? (String(form.get("pix_chave") || "") || null) : null,
         iban: pais === "ES" ? (String(form.get("iban") || "") || null) : null,
         regime_fiscal: regime || null,
+        aliquota_iss: pais === "BR" ? (form.get("aliquota_iss") ? Number(form.get("aliquota_iss")) : null) : null,
         direccion: (pais === "ES" || pais === "US") ? (String(form.get("direccion") || "") || null) : null,
         codigo_postal: (pais === "ES" || pais === "US") ? (String(form.get("codigo_postal") || "") || null) : null,
         provincia: (pais === "ES" || pais === "US") ? (String(form.get("provincia") || "") || null) : null,
@@ -1257,6 +1259,7 @@ function CadastroEmpresaPage({ empresa, onSaved, setScreen, onVoltarLogin }) {
                   <option value="lucro_real">Lucro Real</option>
                 </select>
               </div>
+              <div><Label htmlFor="aliquota_iss">{t("cad_aliquota", pais)}</Label><Input id="aliquota_iss" name="aliquota_iss" type="number" step="0.01" min="0" max="100" defaultValue={empresa?.aliquota_iss ?? ""} placeholder="2.00" /></div>
             </div>
           )}
 
