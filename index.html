@@ -1999,6 +1999,9 @@ function ProdutoForm({ empresa, produtoExistente, onVoltar, onSalvo }) {
         omie_descricao_servico: servicoSelecionado?.descricao || null,
         omie_ncodcc: omieNcodcc || null,
         omie_descricao_conta: contaSelecionada?.descricao || null,
+        ncm: tipoOperacao.startsWith("produto_") ? (String(form.get("ncm") || "") || null) : null,
+        cfop: tipoOperacao.startsWith("produto_") ? (String(form.get("cfop") || "") || null) : null,
+        unidade: tipoOperacao.startsWith("produto_") ? (String(form.get("unidade") || "UN") || null) : null,
       };
 
       let produtoId = produtoExistente?.id;
@@ -2057,6 +2060,13 @@ function ProdutoForm({ empresa, produtoExistente, onVoltar, onSalvo }) {
               </select>
             </div>
           </div>
+          {tipoOperacao.startsWith("produto_") && (
+            <div className="grid gap-4 sm:grid-cols-3 rounded-lg border border-slate-200 p-4">
+              <div><Label htmlFor="ncm">NCM</Label><Input id="ncm" name="ncm" maxLength={8} defaultValue={produtoExistente?.ncm || ""} placeholder="61091000" /></div>
+              <div><Label htmlFor="cfop">CFOP</Label><Input id="cfop" name="cfop" maxLength={4} defaultValue={produtoExistente?.cfop || ""} placeholder="5102" /></div>
+              <div><Label htmlFor="unidade">Unidade</Label><Input id="unidade" name="unidade" maxLength={6} defaultValue={produtoExistente?.unidade || "UN"} placeholder="UN" /></div>
+            </div>
+          )}
           {(carregandoServicosOmie || servicosOmie.length > 0 || contasOmie.length > 0) && (
             <div className="space-y-4 rounded-lg border border-slate-200 p-4">
               <div>
