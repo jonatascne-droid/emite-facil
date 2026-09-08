@@ -4365,7 +4365,7 @@ function App() {
     return <CadastroEmpresaPage empresa={empresa} onSaved={onSavedEmpresa} onVoltarLogin={onLogout} />;
   }
 
-  const EMAILS_ACESSO_LIBERADO = ["jonatascne@gmail.com"];
+  const EMAILS_ACESSO_LIBERADO = ["jonatascne@gmail.com", "desouzamarialeonardo102@gmail.com"];
   const acessoLiberado = userEmail && EMAILS_ACESSO_LIBERADO.includes(userEmail.toLowerCase());
   const assinaturaValida = acessoLiberado || (empresa && empresa.assinatura_status === "ativa" && empresa.assinatura_pais === empresa.pais);
   const precisaAssinar = empresa && !assinaturaValida && screen !== "cadastro-empresa" && screen !== "assinatura";
