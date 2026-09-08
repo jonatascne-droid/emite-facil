@@ -260,6 +260,13 @@ const TRADUCOES = {
     pd_pagamento: "Pagamento", pd_codigo: "Código", pd_nota_num: "Nota nº", pd_ver_pdf: "Ver PDF da nota",
     pd_erro: "Erro:", pd_status_emitido: "Emitido", pd_status_confirmado_manual: "Confirmado manualmente",
     pd_cancelar_nota_aviso_omie: "Precisa cancelar essa nota? Isso só pode ser feito direto no painel da Omie (o cancelamento não está disponível pela nossa integração).",
+    pd_visualizar_nota: "Visualizar nota fiscal", pd_erro_ver_nota: "Não foi possível abrir a nota fiscal.",
+    pd_cancelar_nota: "Cancelar nota fiscal",
+    pd_motivo_cancelamento_prompt: "Motivo do cancelamento (mínimo 15 caracteres):",
+    pd_motivo_cancelamento_curto: "Informe um motivo com pelo menos 15 caracteres.",
+    pd_confirmar_cancelamento_nota: "Tem certeza que deseja cancelar essa nota fiscal? Essa ação não pode ser desfeita.",
+    pd_nota_cancelada_sucesso: "Cancelamento da nota fiscal solicitado com sucesso.",
+    pd_erro_cancelar_nota: "Não foi possível cancelar a nota fiscal.",
     pd_status_aguardando_confirmacao: "Aguardando confirmação",
     pd_aguardando_confirmacao_omie: "Envio pra emissão realizado com sucesso! Assim que a Omie confirmar de fato a nota, avisamos aqui.",
     pd_status_falha: "Emitir manualmente", pd_status_erro_pagamento: "Erro no pagamento", pd_status_processando: "Processando",
@@ -473,6 +480,13 @@ const TRADUCOES = {
     pd_pagamento: "Pago", pd_codigo: "Código", pd_nota_num: "Factura nº", pd_ver_pdf: "Ver PDF de la factura",
     pd_erro: "Error:", pd_status_emitido: "Emitida", pd_status_confirmado_manual: "Confirmada manualmente",
     pd_cancelar_nota_aviso_omie: "¿Necesitas cancelar esta factura? Solo se puede hacer directamente en el panel de la Omie (la cancelación no está disponible desde nuestra integración).",
+    pd_visualizar_nota: "Ver factura", pd_erro_ver_nota: "No se pudo abrir la factura.",
+    pd_cancelar_nota: "Cancelar factura",
+    pd_motivo_cancelamento_prompt: "Motivo de la cancelación (mínimo 15 caracteres):",
+    pd_motivo_cancelamento_curto: "Indica un motivo con al menos 15 caracteres.",
+    pd_confirmar_cancelamento_nota: "¿Seguro que deseas cancelar esta factura? Esta acción no se puede deshacer.",
+    pd_nota_cancelada_sucesso: "Cancelación de la factura solicitada con éxito.",
+    pd_erro_cancelar_nota: "No se pudo cancelar la factura.",
     pd_status_aguardando_confirmacao: "Esperando confirmación",
     pd_aguardando_confirmacao_omie: "¡Envío para emisión realizado con éxito! En cuanto la Omie confirme la factura, te avisamos aquí.",
     pd_status_falha: "Emitir manualmente", pd_status_erro_pagamento: "Error en el pago", pd_status_processando: "Procesando",
@@ -683,6 +697,13 @@ const TRADUCOES = {
     pd_pagamento: "Payment", pd_codigo: "Code", pd_nota_num: "Invoice #", pd_ver_pdf: "View invoice PDF",
     pd_erro: "Error:", pd_status_emitido: "Issued", pd_status_confirmado_manual: "Manually confirmed",
     pd_cancelar_nota_aviso_omie: "Need to cancel this invoice? That can only be done directly in Omie's panel (cancellation isn't available through our integration).",
+    pd_visualizar_nota: "View invoice", pd_erro_ver_nota: "Could not open the invoice.",
+    pd_cancelar_nota: "Cancel invoice",
+    pd_motivo_cancelamento_prompt: "Reason for cancellation (minimum 15 characters):",
+    pd_motivo_cancelamento_curto: "Enter a reason with at least 15 characters.",
+    pd_confirmar_cancelamento_nota: "Are you sure you want to cancel this invoice? This action cannot be undone.",
+    pd_nota_cancelada_sucesso: "Invoice cancellation requested successfully.",
+    pd_erro_cancelar_nota: "Could not cancel the invoice.",
     pd_status_aguardando_confirmacao: "Awaiting confirmation",
     pd_aguardando_confirmacao_omie: "Sent for issuance successfully! As soon as Omie confirms the invoice, we'll notify you here.",
     pd_status_falha: "Issue manually", pd_status_erro_pagamento: "Payment error", pd_status_processando: "Processing",
@@ -2985,6 +3006,8 @@ function CardPedido({ pedido, onAtualizado, pais, naLixeira }) {
   const [confirmando, setConfirmando] = useState(false);
   const [carregandoComprovante, setCarregandoComprovante] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
+  const [carregandoNota, setCarregandoNota] = useState(false);
+  const [cancelandoNota, setCancelandoNota] = useState(false);
   const info = getStatusInfo(pais)[pedido.status] || { cor: "border-slate-200 bg-slate-50 text-slate-600", rotulo: pedido.status };
   const aguardandoConfirmacaoOmie = pedido.notas_fiscais?.status === "aguardando_confirmacao";
   const infoEfetiva = aguardandoConfirmacaoOmie
@@ -3064,6 +3087,51 @@ function CardPedido({ pedido, onAtualizado, pais, naLixeira }) {
       toast.error(err instanceof Error ? err.message : t("pd_erro_comprovante", pais));
     } finally {
       setCarregandoComprovante(false);
+    }
+  }
+
+  async function visualizarNota() {
+    setCarregandoNota(true);
+    try {
+      const { data: sessionData } = await sb.auth.getSession();
+      const resp = await fetch("https://anbvaoegvvjqcfhurpet.supabase.co/functions/v1/gerenciar-nota-fiscal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + sessionData.session.access_token },
+        body: JSON.stringify({ pedido_id: pedido.id, acao: "visualizar" }),
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.url) throw new Error(data.error || t("pd_erro_ver_nota", pais));
+      window.open(data.url, "_blank");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("pd_erro_ver_nota", pais));
+    } finally {
+      setCarregandoNota(false);
+    }
+  }
+
+  async function cancelarNota() {
+    const motivo = window.prompt(t("pd_motivo_cancelamento_prompt", pais)) || "";
+    if (motivo.trim().length < 15) {
+      if (motivo.trim().length > 0) toast.error(t("pd_motivo_cancelamento_curto", pais));
+      return;
+    }
+    if (!window.confirm(t("pd_confirmar_cancelamento_nota", pais))) return;
+    setCancelandoNota(true);
+    try {
+      const { data: sessionData } = await sb.auth.getSession();
+      const resp = await fetch("https://anbvaoegvvjqcfhurpet.supabase.co/functions/v1/gerenciar-nota-fiscal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + sessionData.session.access_token },
+        body: JSON.stringify({ pedido_id: pedido.id, acao: "cancelar", motivo: motivo.trim() }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || t("pd_erro_cancelar_nota", pais));
+      toast.success(t("pd_nota_cancelada_sucesso", pais));
+      onAtualizado && onAtualizado();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("pd_erro_cancelar_nota", pais));
+    } finally {
+      setCancelandoNota(false);
     }
   }
 
@@ -3196,6 +3264,20 @@ function CardPedido({ pedido, onAtualizado, pais, naLixeira }) {
           {pedido.notas_fiscais?.status === "sucesso" && pedido.notas_fiscais?.provedores_fiscais?.slug === "omie" && (
             <p className="text-slate-400 mt-2 text-xs">{t("pd_cancelar_nota_aviso_omie", pais)}</p>
           )}
+          {pedido.notas_fiscais?.status === "sucesso" && pedido.notas_fiscais?.provedores_fiscais?.slug === "notaas" && (
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+              {!pedido.notas_fiscais?.url_pdf && (
+                <button onClick={visualizarNota} disabled={carregandoNota}
+                  className="text-primary-600 hover:underline text-xs font-medium flex items-center gap-1.5 disabled:opacity-60">
+                  {carregandoNota ? <Icon.Spinner className="h-3 w-3" /> : <Icon.Link className="h-3 w-3" />}{t("pd_visualizar_nota", pais)}
+                </button>
+              )}
+              <button onClick={cancelarNota} disabled={cancelandoNota}
+                className="text-red-600 hover:underline text-xs font-medium flex items-center gap-1.5 disabled:opacity-60">
+                {cancelandoNota ? <Icon.Spinner className="h-3 w-3" /> : <Icon.Trash className="h-3 w-3" />}{t("pd_cancelar_nota", pais)}
+              </button>
+            </div>
+          )}
 
           <div className="mt-3 pt-3 border-t border-slate-200 flex flex-wrap gap-2">
             {naLixeira ? (
@@ -3234,7 +3316,7 @@ function PedidosPage({ empresa }) {
   const carregar = useCallback(() => {
     if (!empresa?.id) { setCarregando(false); return; }
     setCarregando(true);
-    return sb.from("pedidos").select("*, produtos_servicos(nome, preco), notas_fiscais(status, numero_nota, url_pdf, mensagem_erro, provedores_fiscais(slug)), pedido_itens(nome_produto, preco_unitario, quantidade, subtotal)")
+    return sb.from("pedidos").select("*, produtos_servicos(nome, preco, tipo_operacao), notas_fiscais(status, numero_nota, url_pdf, mensagem_erro, notaas_invoice_id, provedores_fiscais(slug)), pedido_itens(nome_produto, preco_unitario, quantidade, subtotal)")
       .eq("empresa_id", empresa.id).order("criado_em", { ascending: false }).limit(100)
       .then(({ data, error }) => {
         if (error) { toast.error(error.message); setPedidos([]); setCarregando(false); return; }
