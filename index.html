@@ -244,7 +244,7 @@ const TRADUCOES = {
     // Pedidos
     pd_titulo: "Pedidos", pd_subtitulo: "Todos os pedidos recebidos, com status de pagamento e emissão da nota.",
     pd_emitir_todas: "Emitir todas", pd_todos: "Todos", pd_precisam_atencao: "Precisam de atenção",
-    pd_emitidos: "Emitidos", pd_aguardando_pagamento: "Aguardando pagamento", pd_vazio: "Nenhum pedido por aqui ainda.",
+    pd_emitidos: "Emitidos", pd_aguardando_pagamento: "Aguardando pagamento", pd_cancelados: "Cancelados", pd_vazio: "Nenhum pedido por aqui ainda.",
     pd_emitir: "Emitir", pd_emitir_novamente: "Emitir novamente", pd_reemissao_confirmar: "Essa nota já foi faturada, deseja mesmo faturá-la novamente?",
     pd_emitido_sucesso: "Nota emitida com sucesso!", pd_erro_emitir: "Não foi possível emitir a nota.",
     pd_pagamento_aberto: "Pagamento em aberto", pd_confirmar_pagamento: "Confirmar pagamento",
@@ -464,7 +464,7 @@ const TRADUCOES = {
     pf_erro_salvar: "No se pudo guardar.",
     pd_titulo: "Pedidos", pd_subtitulo: "Todos los pedidos recibidos, con estado de pago y emisión de la factura.",
     pd_emitir_todas: "Emitir todas", pd_todos: "Todos", pd_precisam_atencao: "Necesitan atención",
-    pd_emitidos: "Emitidos", pd_aguardando_pagamento: "Esperando pago", pd_vazio: "Ningún pedido por aquí todavía.",
+    pd_emitidos: "Emitidos", pd_aguardando_pagamento: "Esperando pago", pd_cancelados: "Cancelados", pd_vazio: "Ningún pedido por aquí todavía.",
     pd_emitir: "Emitir", pd_emitir_novamente: "Emitir de nuevo", pd_reemissao_confirmar: "Esta factura ya fue emitida, ¿de verdad quieres emitirla de nuevo?",
     pd_emitido_sucesso: "¡Factura emitida con éxito!", pd_erro_emitir: "No se pudo emitir la factura.",
     pd_pagamento_aberto: "Pago pendiente", pd_confirmar_pagamento: "Confirmar pago",
@@ -681,7 +681,7 @@ const TRADUCOES = {
     pf_erro_salvar: "Could not save.",
     pd_titulo: "Orders", pd_subtitulo: "All orders received, with payment status and invoice issuance.",
     pd_emitir_todas: "Issue all", pd_todos: "All", pd_precisam_atencao: "Need attention",
-    pd_emitidos: "Issued", pd_aguardando_pagamento: "Awaiting payment", pd_vazio: "No orders here yet.",
+    pd_emitidos: "Issued", pd_aguardando_pagamento: "Awaiting payment", pd_cancelados: "Cancelled", pd_vazio: "No orders here yet.",
     pd_emitir: "Issue", pd_emitir_novamente: "Issue again", pd_reemissao_confirmar: "This invoice was already issued — do you really want to issue it again?",
     pd_emitido_sucesso: "Invoice issued successfully!", pd_erro_emitir: "Could not issue the invoice.",
     pd_pagamento_aberto: "Payment pending", pd_confirmar_pagamento: "Confirm payment",
@@ -3365,6 +3365,7 @@ function PedidosPage({ empresa }) {
     { key: "falha_emissao", rotulo: t("pd_precisam_atencao", pais) },
     { key: "emitido", rotulo: t("pd_emitidos", pais) },
     { key: "aguardando_pagamento", rotulo: t("pd_aguardando_pagamento", pais) },
+    { key: "cancelado", rotulo: t("pd_cancelados", pais) },
     { key: "lixeira", rotulo: t("pd_lixeira", pais) },
   ];
 
